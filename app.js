@@ -17,6 +17,8 @@ document.addEventListener('click', event => {
         
         node.classList.toggle('fa-lock-open')
         node.classList.toggle('fa-lock')
+    } else if (type === 'copy') {
+        copyToClickboard(event.target.textContent)
     }
 })
 
@@ -30,16 +32,34 @@ function generateRandomColor() {
     return '#' + color;
 }
 
-function setRandomColors() {
-    boxes.forEach((box) => {
+function copyToClickboard(text) {
+    return navigator.clipboard.writeText(text)
+}
+
+function setRandomColors(isInitial) {
+    const colors = isInitial ? getColorsFromHash() : [];
+
+    
+    boxes.forEach((box, index) => {
         const isLocked = box.querySelector('i').classList.contains('fa-lock')
         const boxLabel = box.querySelector('h2')
-        const color = generateRandomColor();
         const button = box.querySelector('button')
 
         if (isLocked) {
+            colors.push(boxLabel.textContent)
             return
         }
+
+        const color = isInitial
+            ? colors[index]
+            ? colors[index]
+            : generateRandomColor()
+            : generateRandomColor();
+
+        if (!isInitial) {
+            colors.push(color)
+        }
+        
 
         boxLabel.textContent = color;
         box.style.background = color;
@@ -47,6 +67,8 @@ function setRandomColors() {
         setTextColor(boxLabel, color)
         setTextColor(button, color)
     })
+
+    updateColorsHash(colors)
 }
 
 function setTextColor(text, color) {
@@ -54,4 +76,19 @@ function setTextColor(text, color) {
     text.style.color = luminance > 0.5 ? 'black' : 'white';
 }
 
-setRandomColors()
+function updateColorsHash(colors = []) {
+    document.location.hash = colors
+        .map((col) => {
+        return col.toString().substring(1)
+        })
+    .join('-')
+}
+
+function getColorsFromHash() {
+    if (document.location.hash.length > 1) {
+        document.location.hash.substring(1).split('-').map((color) => '# + color')
+    }
+    return []
+}
+
+setRandomColors(true)
